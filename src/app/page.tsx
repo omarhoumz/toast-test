@@ -1,9 +1,14 @@
-import Link from 'next/link'
+import { ShowToast } from './show-toast'
+import { GlobalToastRegion } from './toast'
 
-export default function Home() {
+export default function DemoPage() {
   return (
     <main className='p-24'>
-      <Link href='/demo'>Go to demo</Link>
+      <h1 className='mb-4 text-2xl text-gray-600'>Test toast</h1>
+
+      <ShowToast />
+
+      <GlobalToastRegion />
     </main>
   )
 }
