@@ -5,10 +5,10 @@ import { useToast, useToastRegion } from '@react-aria/toast'
 import type { ToastState } from '@react-stately/toast'
 import { ToastQueue, useToastQueue } from '@react-stately/toast'
 import { AnimatePresence, motion } from 'framer-motion'
-import { useRef } from 'react'
+import { ReactNode, useRef } from 'react'
 import { createPortal } from 'react-dom'
 
-export const toastQueue = new ToastQueue({ maxVisibleToasts: 5 })
+export const toastQueue = new ToastQueue<ReactNode>({ maxVisibleToasts: 5 })
 
 interface ToastRegionProps<T> extends AriaToastRegionProps {
   state: ToastState<T>
@@ -18,11 +18,11 @@ interface ToastProps<T> extends AriaToastProps<T> {
   state: ToastState<T>
 }
 
-export function GlobalToastRegion(props) {
+export function GlobalToastRegion() {
   const state = useToastQueue(toastQueue)
 
   return state.visibleToasts.length > 0
-    ? createPortal(<ToastRegion {...props} state={state} />, document.body)
+    ? createPortal(<ToastRegion state={state} />, document.body)
     : null
 }
 
@@ -62,6 +62,7 @@ function Toast<T extends React.ReactNode>({ state, ...props }: ToastProps<T>) {
   const margin = 16
 
   return (
+    // @ts-ignore
     <motion.div
       {...toastProps}
       ref={ref}
@@ -87,6 +88,7 @@ function Toast<T extends React.ReactNode>({ state, ...props }: ToastProps<T>) {
       style={{ width, WebkitTapHighlightColor: 'transparent' }}
     >
       <div {...titleProps}>{props.toast.content}</div>
+      {/* @ts-ignore */}
       <button {...btnProps} type='button'>
         x
       </button>
