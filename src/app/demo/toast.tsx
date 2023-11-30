@@ -4,6 +4,7 @@ import type { AriaToastProps, AriaToastRegionProps } from '@react-aria/toast'
 import { useToast, useToastRegion } from '@react-aria/toast'
 import type { ToastState } from '@react-stately/toast'
 import { ToastQueue, useToastQueue } from '@react-stately/toast'
+import { AnimatePresence, motion } from 'framer-motion'
 import { useRef } from 'react'
 import { createPortal } from 'react-dom'
 
@@ -38,9 +39,11 @@ function ToastRegion<T extends React.ReactNode>({
       ref={ref}
       className='fixed top-4 right-4 flex gap-2 flex-col-reverse'
     >
-      {state.visibleToasts.map((toast) => (
-        <Toast key={toast.key} toast={toast} state={state} />
-      ))}
+      <AnimatePresence>
+        {state.visibleToasts.map((toast) => (
+          <Toast key={toast.key} toast={toast} state={state} />
+        ))}
+      </AnimatePresence>
     </div>
   )
 }
@@ -55,24 +58,38 @@ function Toast<T extends React.ReactNode>({ state, ...props }: ToastProps<T>) {
 
   const btnProps = { ...otherProps, onClick: onPress }
 
+  const width = 300
+  const margin = 16
+
   return (
-    <div
+    <motion.div
       {...toastProps}
       ref={ref}
-      className='flex items-center gap-4 bg-sky-500 text-white px-4 py-3 rounded data-[animation=entering]:animate-slideIn data-[animation=queued]:animate-fadeIn data-[animation=exiting]:animate-slideOut data-[animation=exiting]:fixed data-[animation=exiting]:right-4 data-[animation=exiting]:pointer-events-none min-w-[300px] justify-between'
-      // Use a data attribute to trigger animations in CSS.
-      data-animation={props.toast.animation}
-      onAnimationEnd={() => {
-        // Remove the toast when the exiting animation completes.
-        if (props.toast.animation === 'exiting') {
-          state.remove(props.toast.key)
-        }
+      className='flex items-center justify-between gap-4 bg-sky-500 text-white px-4 py-3 rounded'
+      layout
+      initial={{ x: width + margin }}
+      animate={{ x: 0 }}
+      exit={{
+        opacity: 0,
+        zIndex: -1,
+        transition: {
+          opacity: {
+            duration: 0.2,
+          },
+        },
       }}
+      transition={{
+        type: 'spring',
+        mass: 1,
+        damping: 30,
+        stiffness: 200,
+      }}
+      style={{ width, WebkitTapHighlightColor: 'transparent' }}
     >
       <div {...titleProps}>{props.toast.content}</div>
       <button {...btnProps} type='button'>
         x
       </button>
-    </div>
+    </motion.div>
   )
 }
