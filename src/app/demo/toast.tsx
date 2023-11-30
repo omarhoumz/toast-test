@@ -7,38 +7,36 @@ import { ToastQueue, useToastQueue } from '@react-stately/toast'
 import { useRef } from 'react'
 import { createPortal } from 'react-dom'
 
-// Create a global toast queue.
-export const toastQueue = new ToastQueue({
-  maxVisibleToasts: 5,
-  hasExitAnimation: true,
-})
-
-export function GlobalToastRegion(props) {
-  // Subscribe to it.
-  let state = useToastQueue(toastQueue)
-
-  // Render toast region.
-  return state.visibleToasts.length > 0
-    ? createPortal(<ToastRegion {...props} state={state} />, document.body)
-    : null
-}
+export const toastQueue = new ToastQueue({ maxVisibleToasts: 5 })
 
 interface ToastRegionProps<T> extends AriaToastRegionProps {
   state: ToastState<T>
+}
+
+interface ToastProps<T> extends AriaToastProps<T> {
+  state: ToastState<T>
+}
+
+export function GlobalToastRegion(props) {
+  const state = useToastQueue(toastQueue)
+
+  return state.visibleToasts.length > 0
+    ? createPortal(<ToastRegion {...props} state={state} />, document.body)
+    : null
 }
 
 function ToastRegion<T extends React.ReactNode>({
   state,
   ...props
 }: ToastRegionProps<T>) {
-  let ref = useRef(null)
-  let { regionProps } = useToastRegion(props, state, ref)
+  const ref = useRef(null)
+  const { regionProps } = useToastRegion(props, state, ref)
 
   return (
     <div
       {...regionProps}
       ref={ref}
-      className='fixed top-4 right-4 flex flex-col gap-2'
+      className='fixed top-4 right-4 flex gap-2 flex-col-reverse'
     >
       {state.visibleToasts.map((toast) => (
         <Toast key={toast.key} toast={toast} state={state} />
@@ -47,13 +45,9 @@ function ToastRegion<T extends React.ReactNode>({
   )
 }
 
-interface ToastProps<T> extends AriaToastProps<T> {
-  state: ToastState<T>
-}
-
 function Toast<T extends React.ReactNode>({ state, ...props }: ToastProps<T>) {
-  let ref = useRef(null)
-  let {
+  const ref = useRef(null)
+  const {
     toastProps,
     titleProps,
     closeButtonProps: { onPress, ...otherProps },
